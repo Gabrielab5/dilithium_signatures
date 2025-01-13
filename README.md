@@ -23,12 +23,16 @@ With a clean and modular structure, this project offers an accessible way to und
     git clone https://github.com/your-repo/dilithium-signatures.git
    cd dilithium-signatures
    
-2.Create a virtual environment (optional):
+2.Create a virtual environment:
 python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+.\venv\Scripts\activate  # For Windows
+source venv/bin/activate  # For macOS/Linux
 
 3.install dependencies:
 pip install -r requirements.txt
+
+-Verify the installation of PyCryptodome (used for ECC-based signatures):
+pip show pycryptodome
 
 4.Run the demonstration:
 python main.py
