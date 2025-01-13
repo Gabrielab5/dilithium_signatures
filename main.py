@@ -1,17 +1,30 @@
+import time
 from dilithium_signatures import generate_keys, sign_message, verify_signature
 
-def main():
-    message = "Hello, Dilithium!"
+def measure_performance():
+    """
+    Measure and display performance of key generation, signing, and verification.
+    """
+    message = "Performance test message"
+    
+    # Measure key generation time
+    start_time = time.time()
     private_key, public_key = generate_keys()
+    key_gen_time = time.time() - start_time
+    print(f"Key Generation Time: {key_gen_time:.6f} seconds")
     
-    print("Private Key:", private_key)
-    print("Public Key:", public_key)
-    
+    # Measure signing time
+    start_time = time.time()
     signature = sign_message(private_key, message)
-    print("Signature:", signature)
+    signing_time = time.time() - start_time
+    print(f"Signing Time: {signing_time:.6f} seconds")
     
+    # Measure verification time
+    start_time = time.time()
     is_valid = verify_signature(public_key, message, signature)
-    print("Is signature valid?", is_valid)
+    verification_time = time.time() - start_time
+    print(f"Verification Time: {verification_time:.6f} seconds")
+    print("Is the signature valid?", is_valid)
 
 if __name__ == "__main__":
-    main()
+    measure_performance()

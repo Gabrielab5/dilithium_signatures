@@ -16,22 +16,22 @@ def generate_keys():
 # Function to sign a message
 def sign_message(private_key, message):
     """
-    Signs a message using the private key.
-    - Hashes the message.
-    - Combines the hashed message with the private key to create a signature.
-    
+    Sign a message using the private key.
     Args:
-        private_key (list): The private key used for signing.
+        private_key (list): The private key for signing.
         message (str): The message to be signed.
-        
     Returns:
         list: The generated signature.
+    Raises:
+        ValueError: If the message is empty or private key is invalid.
     """
-    hashed_message = hashlib.sha256(message.encode()).hexdigest()  # Hash the message
-    # Create the signature by combining the hash with the private key
-    print("Hashed message:", hashed_message)  # Debugging
+    if not message:
+        raise ValueError("Message cannot be empty.")
+    if not private_key.any():
+        raise ValueError("Private key is invalid.")
+
+    hashed_message = hashlib.sha256(message.encode()).hexdigest()
     signature = [int(char, 16) * pk for char, pk in zip(hashed_message[:len(private_key)], private_key)]
-    print("Generated signature:", signature)  # Debugging
     return signature
 
 # Function to verify a signature
@@ -40,16 +40,19 @@ def verify_signature(public_key, message, signature):
     Verifies a message signature using the public key.
     - Hashes the message.
     - Recreates the expected signature based on the public key.
-    - Compares the recreated signature with the provided signature.
-    
+    - Compares the recreated signature with the provided signature.   
     Args:
         public_key (list): The public key used for verification.
         message (str): The message to verify.
-        signature (list): The signature to verify.
-        
-    Returns:
-        bool: True if the signature is valid, False otherwise.
+        signature (list): The signature to verify.        
+    Raises:
+        ValueError: If the message, public key, or signature is invalid.
     """
+    if not message:
+        raise ValueError("Message cannot be empty.")
+    if not public_key.any() or not signature:
+        raise ValueError("Public key or signature is invalid.")
+    
     hashed_message = hashlib.sha256(message.encode()).hexdigest()  # Hash the message
     print("Hashed message for verification:", hashed_message)  # Debugging
     # Recreate the expected signature using the public key

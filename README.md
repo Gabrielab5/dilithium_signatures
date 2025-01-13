@@ -9,7 +9,8 @@ With a clean and modular structure, this project offers an accessible way to und
 - **Key Generation**: Generate a private and public key pair.
 - **Message Signing**: Sign messages using the private key.
 - **Signature Verification**: Verify signed messages using the public key.
-- Simplified implementation for educational purposes.
+- Performance measurement
+- Unit tests for robustness
 
 ## Requirements
 - Python 3.8 or higher
@@ -18,16 +19,24 @@ With a clean and modular structure, this project offers an accessible way to und
 
 ## Installation
 1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/digital-signatures-dilithium.git
-   cd digital-signatures-dilithium
+   
+    git clone https://github.com/your-repo/dilithium-signatures.git
+   cd dilithium-signatures
    
 2.Create a virtual environment (optional):
 python -m venv venv
 source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 
 3.install dependencies:
-pip install numpy
+pip install -r requirements.txt
+
+4.Run the demonstration:
+python main.py
+
+5.Run tests:
+python -m unittest test_dilithium.py
+
+
 
 ## Usage
 1.Run the dilithium_signatures.py file:
@@ -36,12 +45,6 @@ python dilithium_signatures.py
 -Generate a key pair.
 -Sign a test message.
 -Verify the signature and display whether it's valid.
-
-Example Output
-Private Key: [12 34 56 78 90 12 34 56 78 90]
-Public Key: [24 68 112 156 180 24 68 112 156 180]
-Signature: [....]
-Is the signature valid? True
 
 ## File Structure
 dilithium_signatures.py: Main script for the implementation.
