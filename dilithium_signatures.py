@@ -29,7 +29,9 @@ def sign_message(private_key, message):
     """
     hashed_message = hashlib.sha256(message.encode()).hexdigest()  # Hash the message
     # Create the signature by combining the hash with the private key
+    print("Hashed message:", hashed_message)  # Debugging
     signature = [int(char, 16) * pk for char, pk in zip(hashed_message[:len(private_key)], private_key)]
+    print("Generated signature:", signature)  # Debugging
     return signature
 
 # Function to verify a signature
@@ -49,8 +51,10 @@ def verify_signature(public_key, message, signature):
         bool: True if the signature is valid, False otherwise.
     """
     hashed_message = hashlib.sha256(message.encode()).hexdigest()  # Hash the message
+    print("Hashed message for verification:", hashed_message)  # Debugging
     # Recreate the expected signature using the public key
-    expected_signature = [int(char, 16) * pk for char, pk in zip(hashed_message[:len(public_key)], public_key)]
+    expected_signature = [int(char, 16) * (pk // 2)  for char, pk in zip(hashed_message[:len(public_key)], public_key)]
+    print("Expected signature:", expected_signature)  # Debugging
     return signature == expected_signature
 
 # Main function to demonstrate the process
