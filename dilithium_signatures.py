@@ -1,89 +1,91 @@
-# Import necessary libraries
-import numpy as np
+import os
+import oqs
 import hashlib
 
-# Function to generate private and public keys
-def generate_keys():
-    """
-    Generates a pair of keys:
-    - Private key: A vector of random integers.
-    - Public key: Derived from the private key (simplified for this example).
-    """
-    private_key = np.random.randint(0, 100, size=(10,))  # Example private key as a random vector
-    public_key = private_key * 2  # Public key derived by multiplying the private key
-    return private_key, public_key
+def generate_keys(dilithium_level="Dilithium3"):
+    """Generates a key pair using the specified Dilithium variant."""
+    try:
+        with oqs.Signature(dilithium_level) as dilithium:
+            public_key = dilithium.generate_keypair()
+            private_key = dilithium.export_secret_key()
+            return private_key, public_key
+    except Exception as e:
+        print(f"Error generating keys: {e}")
+        return None, None
 
-# Function to sign a message
+def save_keys(private_key, public_key, folder="keys/"):
+    """Saves private and public keys to files."""
+    try:
+        os.makedirs(folder, exist_ok=True)
+        with open(folder + "private.key", "wb") as f:
+            f.write(private_key)
+        with open(folder + "public.key", "wb") as f:
+            f.write(public_key)
+        print("Keys saved successfully.")
+    except Exception as e:
+        print(f"Error saving keys: {e}")
+
+def load_keys(folder="keys/"):
+    """Loads previously saved keys from files."""
+    try:
+        with open(folder + "private.key", "rb") as f:
+            private_key = f.read()
+        with open(folder + "public.key", "rb") as f:
+            public_key = f.read()
+        print("Keys loaded successfully.")
+        return private_key, public_key
+    except FileNotFoundError:
+        print("Key files not found. Generating new keys...")
+        return generate_keys()
+    except Exception as e:
+        print(f"Error loading keys: {e}")
+        return None, None
+
 def sign_message(private_key, message):
-    """
-    Sign a message using the private key.
-    Args:
-        private_key (list): The private key for signing.
-        message (str): The message to be signed.
-    Returns:
-        list: The generated signature.
-    Raises:
-        ValueError: If the message is empty or private key is invalid.
-    """
+    """Signs a message using the Dilithium private key."""
+    if not private_key:
+        raise ValueError("Invalid private key.")
     if not message:
         raise ValueError("Message cannot be empty.")
-    if not private_key.any():
-        raise ValueError("Private key is invalid.")
+    try:
+        with oqs.Signature("Dilithium3") as dilithium:
+            dilithium.import_secret_key(private_key)
+            return dilithium.sign(message.encode())
+    except Exception as e:
+        print(f"Error signing message: {e}")
+        return None
 
-    hashed_message = hashlib.sha256(message.encode()).hexdigest()
-    signature = [int(char, 16) * pk for char, pk in zip(hashed_message[:len(private_key)], private_key)]
-    return signature
-
-# Function to verify a signature
 def verify_signature(public_key, message, signature):
-    """
-    Verifies a message signature using the public key.
-    - Hashes the message.
-    - Recreates the expected signature based on the public key.
-    - Compares the recreated signature with the provided signature.   
-    Args:
-        public_key (list): The public key used for verification.
-        message (str): The message to verify.
-        signature (list): The signature to verify.        
-    Raises:
-        ValueError: If the message, public key, or signature is invalid.
-    """
-    if not message:
-        raise ValueError("Message cannot be empty.")
-    if not public_key.any() or not signature:
+    """Verifies a signature using the Dilithium public key."""
+    if not public_key or not signature:
         raise ValueError("Public key or signature is invalid.")
-    
-    hashed_message = hashlib.sha256(message.encode()).hexdigest()  # Hash the message
-    print("Hashed message for verification:", hashed_message)  # Debugging
-    # Recreate the expected signature using the public key
-    expected_signature = [int(char, 16) * (pk // 2)  for char, pk in zip(hashed_message[:len(public_key)], public_key)]
-    print("Expected signature:", expected_signature)  # Debugging
-    return signature == expected_signature
+    try:
+        with oqs.Signature("Dilithium3") as dilithium:
+            dilithium.import_public_key(public_key)
+            return dilithium.verify(message.encode(), signature)
+    except Exception as e:
+        print(f"Error verifying signature: {e}")
+        return False
 
-# Main function to demonstrate the process
-def main():
-    """
-    Demonstrates the process of key generation, signing, and verifying:
-    - Generates a key pair (private and public).
-    - Signs a test message using the private key.
-    - Verifies the signature using the public key.
-    """
-    # Test message to sign
-    message = "Hello, this is a test message!"
-    
-    # Generate keys
-    private_key, public_key = generate_keys()
-    print("Private Key:", private_key)
-    print("Public Key:", public_key)
-    
-    # Sign the message
-    signature = sign_message(private_key, message)
-    print("Signature:", signature)
-    
-    # Verify the signature
-    is_valid = verify_signature(public_key, message, signature)
-    print("Is the signature valid?", is_valid)
+def command_line_verifier():
+    """Command-line tool for verifying Dilithium signatures."""
+    import sys
+    if len(sys.argv) < 4:
+        print("Usage: python verify.py <public_key_file> <message> <signature_file>")
+        sys.exit(1)
+    try:
+        with open(sys.argv[1], "rb") as f:
+            public_key = f.read()
+        message = sys.argv[2]
+        with open(sys.argv[3], "rb") as f:
+            signature = f.read()
+        is_valid = verify_signature(public_key, message, signature)
+        if is_valid:
+            print("Signature is valid.")
+        else:
+            print("Signature verification failed.")
+    except Exception as e:
+        print(f"Error in verification: {e}")
 
-# Entry point for the program
 if __name__ == "__main__":
-    main()
+    command_line_verifier()
